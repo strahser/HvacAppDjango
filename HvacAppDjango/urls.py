@@ -6,5 +6,4 @@ urlpatterns = [
     path("__debug__/", include("debug_toolbar.urls")),
     path('adminactions/', include('adminactions.urls')),
 
-
 ]

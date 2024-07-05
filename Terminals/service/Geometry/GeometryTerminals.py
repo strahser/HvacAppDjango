@@ -102,7 +102,7 @@ class CheckPointLocation:
 
 
 class CreateCurveDictionary:
-	def __init__(self, perimeter_curve: gl.Line):
+	def __init__(self, perimeter_curve: list[gl.Line]):
 		"""_summary_
         ceiling_offset (int, optional): offset from ceiling. Defaults to -500.
         """

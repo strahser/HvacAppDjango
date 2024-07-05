@@ -46,7 +46,7 @@ class PolygonPlotter:
 			self.ax.add_patch(p)
 
 	def add_coordinate_axis(self):
-		if self._df[ColumnChoosing.S_ID].count()>2:
+		if self._df[ColumnChoosing.S_ID].count() > 2:
 			self.ax.set_xlim(*self.x_min_max)
 			self.ax.set_ylim(*self.y_min_max)
 

@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from Terminals.service.InputData.InputDataDF import *
 from Terminals.service.library_hvac_app.DbFunction.pandas_custom_function import create_json_list, df_to_excel_in_memory
 import pandas as pd

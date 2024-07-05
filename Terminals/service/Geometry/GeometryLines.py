@@ -78,7 +78,7 @@ class GeometryUtility:
 		return segments
 
 	@staticmethod
-	def get_lines_in_polygon(polygon):
+	def get_lines_in_polygon(polygon)->list:
 		polygon_boundary = np.array(polygon)
 		lines = [Line(polygon_boundary[k:k + 2])
 		         for k in range(len(polygon_boundary) - 1)]

@@ -8,6 +8,7 @@ from Spaces.models import SpaceData
 from StaticDB.StaticData.OrientationData import OrientationData
 from StaticDB.StaticData.SpaceDataRepresentation import SpaceDataRepresentation
 from StaticDB.StaticData.StructureTypeData import StructureTypeData
+from StaticDB.models.SunRadiationData import SunRadiationData
 from Structures.HeatCalculation.StructureThermalResistenceCoefficient import \
 	get_normative_thermal_resistence_coefficient
 from Structures.models.BaseModel import BaseModel
@@ -33,7 +34,7 @@ class Structure(BaseModel, SpaceDataRepresentation):
 	                                    on_delete=models.CASCADE,
 	                                    related_name='base_structure')
 	orientation = models.CharField(
-		max_length=3, blank=False, null=False, choices=OrientationData.choices(),
+		max_length=50, blank=False, null=False, choices=OrientationData.choices(),
 		verbose_name="ориент.", default=OrientationData.ND.name
 	)
 	width = models.FloatField(verbose_name='Ширина', default=1, null=True, blank=True)
@@ -60,7 +61,7 @@ class Structure(BaseModel, SpaceDataRepresentation):
 	def K_real(self):
 		return round(1 / self.R_real(), 2)
 
-	@admin.display(description='Тип констр.')
+	@admin.display(description='Тип констр.', ordering='base_structures')
 	def standard_structure_type(self):
 		qs = Structure.objects.get(pk=self.pk).base_structures.standard_structure_type
 		type = getattr(StructureTypeData, f'{qs}')
@@ -106,4 +107,32 @@ class Structure(BaseModel, SpaceDataRepresentation):
 	@admin.display(description='Теплопотери,Вт')
 	def calculate_heat_loss(self):
 		return round(self.K_real() * self.area * self.k_orient() * self.corner_space_coefficient() * (
-					self.t_in() - self.t_out()), 1)
+				self.t_in() - self.t_out()), 1)
+
+
+class StructureRadiation(Structure):
+	class Meta:
+		proxy = True
+		verbose_name = "Конструкция Радиация"
+		verbose_name_plural = "Конструкции Радиация"
+		ordering = ['base_structures__name']
+
+	@admin.display(description='Удельная радиация,Вт', ordering='')
+	def radiation_data(self):
+		radiation = (
+			SunRadiationData.objects
+			.filter(id=self.space.building.climate_data.sun_radiation.id)
+			.filter(standard_structure_type=self.base_structures.standard_structure_type).first()
+		)
+		if radiation:
+			try:
+				return getattr(radiation, self.orientation)
+			except:
+				pass
+
+	@admin.display(description='Суммарная радиация,Вт', ordering='')
+	def calculate_radiation(self):
+		try:
+			return self.radiation_data() * self.area
+		except:
+			return 0

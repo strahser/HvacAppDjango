@@ -15,7 +15,7 @@ box_2 = {
 text_style = {
 	"horizontalalignment": 'center',
 	"verticalalignment": 'center',
-	"fontsize": 14,
+	"fontsize": 10,
 	"color": "blue",
 	"style": 'italic',
 }

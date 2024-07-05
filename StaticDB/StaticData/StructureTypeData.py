@@ -1,5 +1,6 @@
 from enum import Enum
 from dataclasses import dataclass
+from typing import List, Tuple, Any
 
 
 @dataclass()
@@ -16,3 +17,6 @@ class StructureTypeData(Enum):
 	Floor: str = "Перекрытие"# Покрытий и перекрытий над проездами
 	Roof: str = "Кровля"# Перекрытий чердачных, над неотапливаемыми подпольями и подвалами
 
+	@classmethod
+	def choices(cls) -> List[Tuple[str, Any]]:
+		return [(item.name, item.value) for item in cls]

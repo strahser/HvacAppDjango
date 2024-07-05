@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 	# "debug_toolbar",
 	'adminactions',
 	'django.contrib.admin',
+	'django_extensions',
 	# "django_custom_admin_pages",
 	# "django_custom_admin_pages.admin.CustomAdminConfig",
 	'django.contrib.auth',
@@ -143,3 +144,4 @@ JSON_SPACE_PATH = BASE_DIR / "polygon_data_file.json"
 CONNECTION = sqlite3.connect(DATABASES['default']['NAME'])
 
 JAZZMIN_SETTINGS = JAZZMIN_SETTINGS_DATA
+LOGIN_REDIRECT_URL = '/'

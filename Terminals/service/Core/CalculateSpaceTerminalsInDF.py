@@ -39,7 +39,7 @@ class CalculateSpaceTerminalsInDF:
 			res['calculation_option'] = 'directive_terminals'
 			return res
 
-		elif row['directive_length'] and row['directive_length'] > 0:
+		elif row['line_length'] and row['directive_length'] > 0:
 			calculated_points = math.ceil(row['line_length'] / row['directive_length'])
 			res = choosing_terminal.get_terminal_from_points_number(calculated_points)
 			res['calculation_option'] = 'directive_length'

@@ -55,7 +55,7 @@ class AddCalculatedPointsToDF:
 		return self.system_df
 
 	@staticmethod
-	def __polygon_offset_checking(df):
+	def __polygon_offset_checking(df:pd.DataFrame):
 		if isinstance(df.offset_polygon, Polygon):
 			return gl.GeometryUtility.get_lines_in_polygon(df.offset_polygon.exterior.coords)
 		else:
@@ -92,7 +92,7 @@ class AddCalculatedPointsToDF:
 			df.device_orientation_option2,
 			df.single_device_orientation,
 			df.minimum_device_number
-		).insert_terminals_in_space(), axis=1)
+		).get_terminals_points_locations(), axis=1)
 		return self.system_df
 
 	def _change_height_of_terminal(self):

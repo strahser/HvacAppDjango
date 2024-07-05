@@ -4,11 +4,11 @@ from Terminals.service.Geometry.GeometryTerminals import CreateCurveDictionary, 
 
 class InsertTerminals:
     def __init__(self,
-                 perimeter_curve: Line,
+                 perimeter_curve: list[Line],
                  device_orientation_option1: str,
                  device_orientation_option2: str,
                  location_type: str,
-                 device_points_number: int
+                 device_points_number: int = None
                  ):
         self.perimeter_curve = perimeter_curve
         self.device_orientation_option1 = device_orientation_option1
@@ -26,7 +26,7 @@ class InsertTerminals:
             self.device_orientation_option2,
             self.location_type,
             self.device_points_number,
-            True
+            two_terminals_on_short_side=True
         )
         return curve_filter
 
@@ -35,7 +35,7 @@ class InsertTerminals:
         curve_filter.choose_long_short_curve_filter()
         return curve_filter.long_curve.Length
 
-    def insert_terminals_in_space(self):
+    def get_terminals_points_locations(self):
         curve_filter = self._create_curve_filter()
         points = curve_filter.split_curve_by_point_definition()
         return points

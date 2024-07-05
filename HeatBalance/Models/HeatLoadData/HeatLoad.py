@@ -30,7 +30,6 @@ class TotalHeat(SpaceData):
 		structures = Structure.objects.filter(space=self). \
 			filter(base_structures__standard_structure_type=StructureTypeData.Window.name).all()
 		data = []
-
 		for structure in structures:
 			try:
 				radiation_value = getattr(self.building.climate_data.sun_radiation, structure.orientation)
@@ -39,7 +38,6 @@ class TotalHeat(SpaceData):
 			except Exception as e:
 				logging.error(e, exc_info=True)
 				data.append(0)
-
 		return sum(data)
 
 	@admin.display(description='Оборудование,Вт.')
@@ -57,13 +55,13 @@ class TotalHeat(SpaceData):
 		def __update_cooling_system():
 			if self.pk in FANCOIL_ID_LIST:
 				system = FancoilSystem.objects.all().filter(space_data__S_ID=self.pk)
-				system.update(system_flow=sum_data)
-				__update_cooling_system()
+				if system.auto_calculate_flow:
+					system.update(system_flow=sum_data)
 
 		data = [self.total_equipment_load(), self.total_lighting_load(),
 		        self.total_human_load(), self.total_radiation_load(), self.additional_load()]
 		sum_data = sum(data)
-
+		__update_cooling_system()
 		return sum_data
 
 	def __str__(self):

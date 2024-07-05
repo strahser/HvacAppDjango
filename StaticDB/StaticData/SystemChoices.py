@@ -3,7 +3,15 @@ from typing import Any, List, Tuple
 from django.db import connection
 from dataclasses import dataclass, field
 
-
+COLOR_CHOICES = [('b', 'синий'),
+                 ('g', 'зеленый'),
+                 ('r', 'красный'),
+                 ('c', 'голубой'),
+                 ('m', 'пурпурный'),
+                 ('y', 'желтый'),
+                 ('k', 'черный'),
+                 ('w', 'белый'),
+                 ]
 class ChoicesBase(enum.Enum):
 	@classmethod
 	def choices(cls) -> List[Tuple[str, Any]]:
@@ -22,11 +30,13 @@ class Orientation(ChoicesBase):
 	right = "вправо"
 	center_horizontal = "центр горизонт."
 	center_vertical = "центр вертикал."
+	center = 'центр'
+	corner = 'угол'
 
 
 class CalculationOptions(ChoicesBase):
 	minimum_terminals = "расчетный минимум"
-	directive_terminals = "заданное колличество"
+	directive_terminals_number = "заданное колличество"
 	directive_length = "заданная длина"
 	device_area = "заданная площадь"
 
@@ -56,6 +66,8 @@ class SystemProperty:
 
 SYSTEM_DICTIONARY: dict[str, SystemProperty] = {
 	SystemType.Supply_system.name: SystemProperty("Supply_system", "S_supply_name", "S_SA_max", "supply_equipment_id"),
-	SystemType.Exhaust_system.name:  SystemProperty("Exhaust_system", "S_exhaust_name", "S_EA_max", "exhaust_equipment_id"),
-	SystemType.Fan_coil_system.name: SystemProperty("Fan_coil_system", "S_cold_name", "S_Cold_Load", "fancoil_equipment_id"),
+	SystemType.Exhaust_system.name: SystemProperty("Exhaust_system", "S_exhaust_name", "S_EA_max",
+	                                               "exhaust_equipment_id"),
+	SystemType.Fan_coil_system.name: SystemProperty("Fan_coil_system", "S_cold_name", "S_Cold_Load",
+	                                                "fancoil_equipment_id"),
 }

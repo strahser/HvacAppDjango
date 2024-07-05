@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 from Structures.Utils.AdminUtils import get_standard_display_list
 from Structures.forms import StructureForm
 from Structures.models.BaseStructure import BaseStructure
-from Structures.models.Structure import Structure
+from Structures.models.Structure import Structure, StructureRadiation
 
 admin.site.site_header = "Панель администрирования"
 admin.site.index_title = "Kласс энергоэффективности"
@@ -12,14 +12,19 @@ admin.site.index_title = "Kласс энергоэффективности"
 @admin.register(Structure)
 class StructureAdmin(admin.ModelAdmin):
 	additional_list = ['standard_structure_type', 'K_real', 't_in', "t_out", "k_orient",
-                       'corner_space_coefficient', 'calculate_heat_loss']
-	suffix_list = Structure.short_names
+	                   'corner_space_coefficient', 'calculate_heat_loss']
 	excluding_list = ['name', 'space', 'base_structures', 'id']
-	list_display = suffix_list + get_standard_display_list(Structure, additional_list=additional_list,
-	                                                       excluding_list=excluding_list)
+	list_display = Structure.short_names + get_standard_display_list(Structure, additional_list=additional_list,
+	                                                                 excluding_list=excluding_list)
 	list_editable = get_standard_display_list(Structure, excluding_list=['id', 'space'] + excluding_list)
 	form = StructureForm
-	list_filter = ['space','name','base_structures','orientation',]
+	list_filter = ['space', 'name', 'base_structures', 'orientation', ]
+
+
+@admin.register(StructureRadiation)
+class StructureRadiationAdmin(admin.ModelAdmin):
+	additional_list = ['standard_structure_type','name','orientation','area','radiation_data','calculate_radiation']
+	list_display = Structure.short_names + additional_list
 
 
 @admin.register(BaseStructure)

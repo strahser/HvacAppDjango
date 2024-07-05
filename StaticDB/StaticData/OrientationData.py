@@ -19,6 +19,7 @@ class OrientationData(Enum):
     SW: str = OrientationDataOptions("ЮЗ", 1)
     W: str = OrientationDataOptions("З", 1.1)
     NW: str = OrientationDataOptions("СЗ", 1.1)
+    horizontal: str = OrientationDataOptions("Горизонтальная", 1)
 
     @classmethod
     def choices(cls) -> List[Tuple[str, Any]]:

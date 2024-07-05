@@ -17,16 +17,14 @@ class BaseStructure(BaseModel):
     """шаблон типовых конструкций, без конкретной площади. Например навесной фасад.
     Состоит из множества слоев. Опционально можем расчитать ГСОП конструкции и получить нормируемый коэффицент теплопередачи,
     если выберим здания/здание (множественный выбор)
-
     """
 
     R_real = models.FloatField(verbose_name="Факт.терм. сопр.", null=False, blank=False, default=1,
                                help_text="принимается в расчетах если не заданы слои конструкций")
     standard_structure_type = models.CharField(max_length=200,
-                                               choices=[(val.name, val.value) for val in StructureTypeData],
-                                               blank=False,
-                                               default=StructureTypeData.Wall,
-                                               verbose_name="тип",
+                                               choices=StructureTypeData.choices(),
+                                                default=StructureTypeData.Wall,
+                                               verbose_name="тип констр.",
                                                )
     structure_picture = models.ImageField(verbose_name="Изображение", blank=True, upload_to="StructureType/%Y/%m/%d/")
 
