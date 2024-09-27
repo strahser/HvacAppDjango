@@ -14,26 +14,23 @@ class BaseModel(models.Model):
 class EquipmentBase(BaseModel):
     system_equipment_type = models.CharField(max_length=200, choices=SystemType.choices(),
                                              default=SystemType.choices()[0])
-    equipment_id = models.CharField(max_length=200, null=True, blank=True, )
+    equipment_id = models.CharField(max_length=200,unique=True)
     family_device_name = models.CharField(max_length=200)
     family_instance_name = models.CharField(max_length=200)
     max_flow = models.FloatField()
     normal_velocity = models.FloatField(default=2, null=True, blank=True)
-    geometry = models.CharField(max_length=200)
-    dimension1 = models.CharField(max_length=200)
-    manufacture = models.CharField(max_length=200)
-    system_flow_parameter_name = models.CharField(max_length=200)
-    system_name_parameter = models.CharField(max_length=200)
+    geometry = models.CharField(max_length=200,null=True, blank=True,default='c')
+    dimension1 = models.CharField(max_length=200,null=True, blank=True)
+    manufacture = models.CharField(max_length=200,null=True, blank=True)
+    system_flow_parameter_name = models.CharField(max_length=200,null=True, blank=True)
+    system_name_parameter = models.CharField(max_length=200,null=True, blank=True)
 
     def __str__(self):
         return f"{self.family_device_name}"
 
     class Meta:
-        """
-        Meta options for the DeviceType model.
-        """
-        verbose_name = 'Оборудование База'
-        verbose_name_plural = 'Оборудование База'
+        verbose_name = 'Терминал'
+        verbose_name_plural = 'Терминалы'
 
 
 class DeviceGeometry(models.Model):
@@ -47,7 +44,8 @@ class DeviceGeometry(models.Model):
     ceiling_offset = models.FloatField(default=500)
 
     class Meta:
-        verbose_name = 'Оборудование Геометрия'
+        verbose_name = 'Терминал Геометрия'
+        verbose_name_plural = 'Терминалы Геометрия'
 
     def __str__(self):
         try:

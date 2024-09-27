@@ -2,5 +2,16 @@
 
 {% block content %}
     {{ block.super }}
-    {{ polygons|safe }}
+<div class="container">
+  <div class="row align-items-start">
+    <div class="col">
+     {{ polygons|safe }}
+    </div>
+      <div class="col">
+     {{ terminal_data|safe }}
+      </div>
+  </div>
+</div>
+
+
 {% endblock %}

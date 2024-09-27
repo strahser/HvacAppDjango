@@ -11,7 +11,7 @@ admin.site.index_title = "Kласс энергоэффективности"
 
 @admin.register(Structure)
 class StructureAdmin(admin.ModelAdmin):
-	additional_list = ['standard_structure_type', 'K_real', 't_in', "t_out", "k_orient",
+	additional_list = ['standard_structure_type', 'K_real','R_Norm','R_real', 't_in', "t_out", "k_orient",
 	                   'corner_space_coefficient', 'calculate_heat_loss']
 	excluding_list = ['name', 'space', 'base_structures', 'id']
 	list_display = Structure.short_names + get_standard_display_list(Structure, additional_list=additional_list,
@@ -23,7 +23,8 @@ class StructureAdmin(admin.ModelAdmin):
 
 @admin.register(StructureRadiation)
 class StructureRadiationAdmin(admin.ModelAdmin):
-	additional_list = ['standard_structure_type','name','orientation','area','radiation_data','calculate_radiation']
+	additional_list = ['standard_structure_type', 'name', 'orientation', 'area', 'radiation_data',
+	                   'calculate_radiation']
 	list_display = Structure.short_names + additional_list
 
 

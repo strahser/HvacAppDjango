@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from Config.models import Building
 from django.contrib import admin
 
+from HvacAppDjango.models.BaseModel import BaseModel
 from Systems.models import ExhaustSystem, SupplySystem, FancoilSystem
 from shapely import Polygon
 
@@ -14,27 +15,30 @@ from Terminals.service.PlotePolygons.PlotTerminals import StaticPlots
 from Terminals.service.PlotePolygons.plote_settings import text_style, box_2
 
 
-class BaseModel(models.Model):
-	creation_stamp = models.DateTimeField(auto_now_add=True, verbose_name="дата создания", null=True)
-	update_stamp = models.DateTimeField(auto_now=True, verbose_name="дата изменения", null=True)
-
-	class Meta:
-		abstract = True
-
-
 class SpaceData(BaseModel):
-	building = models.ForeignKey(Building, on_delete=models.PROTECT)
+	report_display_names = ['S_ID', 'S_Number', 'S_Name']  # for reports
 	S_ID = models.CharField(primary_key=True, max_length=200)
-	S_Number = models.IntegerField(null=True, blank=True)
-	S_Name = models.CharField(max_length=200, null=True, blank=True)
-	S_height = models.FloatField(null=True, blank=True)
-	S_area = models.FloatField(null=True, blank=True)
-	S_Volume = models.FloatField(null=True, blank=True)
-	S_level = models.CharField(max_length=200, null=True, blank=True)
-	human_number = models.FloatField(null=True, blank=True, default=1)
-	space_category = models.ForeignKey("StaticDB.SpaceCategory", on_delete=models.PROTECT)
-	short_names = ['S_ID', 'S_Number', 'S_Name']
+	building = models.ForeignKey(Building, null=True, blank=True, on_delete=models.SET_NULL,verbose_name="Здание")
+	space_category = models.ForeignKey("StaticDB.SpaceCategory", null=True, blank=True,
+	                                   on_delete=models.SET_NULL, verbose_name="Категория пространства")
+	S_Number = models.CharField(max_length=200,null=True, blank=True, verbose_name="Ном.пом.")
+	S_Name = models.CharField(max_length=200, null=True, blank=True, verbose_name="Наим.Пом.")
+	S_height = models.FloatField(null=True, blank=True, verbose_name="Высота Пом.")
+	S_area = models.FloatField(null=True, blank=True, verbose_name="Площ.Пом.")
+	S_Volume = models.FloatField(null=True, blank=True, verbose_name="Объем Пом.")
+	S_level = models.CharField(max_length=200, null=True, blank=True, verbose_name="Уровень")
+	human_number = models.FloatField(null=True, blank=True, default=1, verbose_name="Кол-во людей")
 	geometry_data = models.JSONField(null=True, blank=True, verbose_name='Геометрия')
+
+	def _update_system(self, system_type, _total_heat_load: float) -> None:
+		"""обновляет system_flow=_total_heat_load"""
+		try:
+			system = system_type.objects \
+				.filter(space__S_ID=self.S_ID) \
+				.filter(auto_calculate_flow=True)
+			system.update(system_flow=_total_heat_load)
+		except Exception as e:
+			print(e)
 
 	@property
 	def system_list(self):
@@ -73,7 +77,7 @@ class SpaceData(BaseModel):
 		if isinstance(self.geometry_data, dict):
 			return self.geometry_data.get('pcy')
 
-	def create_polygon(self):
+	def create_polygon(self) -> Polygon:
 		return Polygon([(x, y) for x, y in zip(self._px, self._py)])
 
 	@staticmethod
@@ -91,7 +95,7 @@ class SpaceData(BaseModel):
 			ax.plot(x, y, color="grey")
 			for system in self.system_list:
 				if system:
-					system.draw_terminals(fig, ax)
+					system._draw_terminals(fig, ax)
 			plt.axis('off')
 			saving_fig = StaticPlots.save_plot(fig)
 			# plt.clf()
@@ -113,11 +117,13 @@ class SpaceData(BaseModel):
 
 	@property
 	def t_min(self):
-		return self.space_category.min_temp
+		if self.space_category.min_temp:
+			return self.space_category.min_temp
 
 	@property
 	def t_out_max(self):
-		return self.building.climate_data.t_out_max
+		if self.building and self.building.climate_data.t_out_max:
+			return self.building.climate_data.t_out_max
 
 	def __str__(self):
 		return f"id:{self.S_ID},пом.:{self.S_Name},№пом.:{self.S_Number}"
@@ -125,8 +131,12 @@ class SpaceData(BaseModel):
 	class Meta:
 		verbose_name = 'Помещение'
 		verbose_name_plural = 'Помещения'
+		ordering = ["S_ID"]
 
 
 class SpaceSystem(SpaceData):
 	class Meta:
 		proxy = True
+		verbose_name = 'Схемы систем'
+		verbose_name_plural = 'Схемы систем'
+		ordering = ["S_ID"]

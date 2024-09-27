@@ -1,5 +1,4 @@
 from pprint import pprint
-
 from django.db import models
 from django.urls import reverse
 from django.contrib import admin
@@ -9,8 +8,6 @@ from StaticDB.StaticData.OrientationData import OrientationData
 from StaticDB.StaticData.SpaceDataRepresentation import SpaceDataRepresentation
 from StaticDB.StaticData.StructureTypeData import StructureTypeData
 from StaticDB.models.SunRadiationData import SunRadiationData
-from Structures.HeatCalculation.StructureThermalResistenceCoefficient import \
-	get_normative_thermal_resistence_coefficient
 from Structures.models.BaseModel import BaseModel
 from Structures.models.BaseStructure import BaseStructure
 from dataclasses import dataclass
@@ -70,9 +67,8 @@ class Structure(BaseModel, SpaceDataRepresentation):
 
 	@admin.display(description='RNorm')
 	def R_Norm(self):
-		gsop = self.space.building.GSOP
-		r_norm = get_normative_thermal_resistence_coefficient(gsop).get(self.standard_structure_type().name)
-		return round(r_norm, 2)
+		if self.space.building and self.base_structures.standard_structure_type:
+			return getattr(self.space.building, self.base_structures.standard_structure_type)
 
 	@admin.display(description='Rфакт')
 	def R_real(self):
@@ -81,11 +77,17 @@ class Structure(BaseModel, SpaceDataRepresentation):
 
 	@admin.display(description='tв, С')
 	def t_in(self):
-		return self.space.t_min
+		if self.space.t_min:
+			return self.space.t_min
+		else:
+			return 0
 
 	@admin.display(description='tн, С')
 	def t_out(self):
-		return self.space.t_out_max
+		if self.space.t_out_max:
+			return self.space.t_out_max
+		else:
+			return 0
 
 	@admin.display(description='Коэф.ориен.')
 	def k_orient(self):
@@ -96,7 +98,7 @@ class Structure(BaseModel, SpaceDataRepresentation):
 		try:
 			k_corner_query = Structure.objects.select_related('space').values(
 				'base_structures__standard_structure_type').filter(space=self.space) \
-				.filter(base_structures__standard_structure_type=StructureTypeData.Wall.name) \
+				.filter(base_structures__standard_structure_type=StructureTypeData.wall.name) \
 				.annotate(unique=Count('orientation', distinct=True)
 			              )
 			unique_wall_number = [val.get('unique') for val in k_corner_query][0]
@@ -119,20 +121,19 @@ class StructureRadiation(Structure):
 
 	@admin.display(description='Удельная радиация,Вт', ordering='')
 	def radiation_data(self):
-		radiation = (
-			SunRadiationData.objects
-			.filter(id=self.space.building.climate_data.sun_radiation.id)
-			.filter(standard_structure_type=self.base_structures.standard_structure_type).first()
-		)
-		if radiation:
-			try:
-				return getattr(radiation, self.orientation)
-			except:
-				pass
+		try:
+			radiation = (
+				SunRadiationData.objects
+				.filter(id=self.space.building.climate_data.sun_radiation.id).first()
+			)
+			return getattr(radiation, self.orientation)
+		except Exception as e:
+			print(e)
+			return 0
 
 	@admin.display(description='Суммарная радиация,Вт', ordering='')
 	def calculate_radiation(self):
-		try:
+		if self.base_structures.standard_structure_type == StructureTypeData.window.name:
 			return self.radiation_data() * self.area
-		except:
+		else:
 			return 0

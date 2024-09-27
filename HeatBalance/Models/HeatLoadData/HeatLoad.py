@@ -1,44 +1,40 @@
 from django.db import models
+from django.db.models import Sum
+
 from Spaces.models import SpaceData
 from django.contrib import admin
 
 from StaticDB.StaticData.SpaceDataRepresentation import SpaceDataRepresentation
 from StaticDB.StaticData.StructureTypeData import StructureTypeData
-from Structures.models.Structure import Structure
+from Structures.models.Structure import Structure, StructureRadiation
 import logging
 from Systems.models import FancoilSystem
+from django.db.models.signals import post_save, pre_save
+from django.dispatch import receiver
 
 logging.basicConfig()
-FANCOIL_ID_LIST = FancoilSystem.objects.all().values_list('space', flat=True)
 
 
-class TotalHeat(SpaceData):
+class HeatBalance(SpaceData):
 
 	@admin.display(description='Освещение,Вт.')
 	def total_lighting_load(self) -> float:
-		return round(self.space_category.lighting * self.S_area, 1)
+		if self.space_category and self.space_category.lighting and self.S_area:
+			return round(self.space_category.lighting * self.S_area, 1)
+		else:
+			return 0
 
 	@admin.display(description='Люди,Вт.')
 	def total_human_load(self) -> float:
-		if self.space_category.human_heat and self.human_number:
+		if self.space_category and self.space_category.human_heat and self.human_number:
 			return round(self.space_category.human_heat * self.human_number, 1)
 		else:
 			return 0.0
 
 	@admin.display(description='Радиация,Вт.')
 	def total_radiation_load(self) -> float:
-		structures = Structure.objects.filter(space=self). \
-			filter(base_structures__standard_structure_type=StructureTypeData.Window.name).all()
-		data = []
-		for structure in structures:
-			try:
-				radiation_value = getattr(self.building.climate_data.sun_radiation, structure.orientation)
-				radiation = structure.area * radiation_value
-				data.append(radiation)
-			except Exception as e:
-				logging.error(e, exc_info=True)
-				data.append(0)
-		return sum(data)
+		res = StructureRadiation.objects.all().filter(space__S_ID=self.pk)
+		return sum([val.radiation_data() for val in res if val.radiation_data()])
 
 	@admin.display(description='Оборудование,Вт.')
 	def total_equipment_load(self) -> float:
@@ -52,16 +48,9 @@ class TotalHeat(SpaceData):
 
 	@admin.display(description='Всего,Вт.')
 	def total_heat_load(self) -> float:
-		def __update_cooling_system():
-			if self.pk in FANCOIL_ID_LIST:
-				system = FancoilSystem.objects.all().filter(space_data__S_ID=self.pk)
-				if system.auto_calculate_flow:
-					system.update(system_flow=sum_data)
-
-		data = [self.total_equipment_load(), self.total_lighting_load(),
-		        self.total_human_load(), self.total_radiation_load(), self.additional_load()]
-		sum_data = sum(data)
-		__update_cooling_system()
+		sum_data = sum([self.total_equipment_load(), self.total_lighting_load(),
+		                self.total_human_load(), self.total_radiation_load(), self.additional_load()])
+		self._update_system(FancoilSystem, sum_data)
 		return sum_data
 
 	def __str__(self):
@@ -114,3 +103,14 @@ class HeatEquipment(models.Model):
 	class Meta:
 		verbose_name = "База Оборудования"
 		verbose_name_plural = "База Оборудования"
+
+
+@receiver(pre_save, sender=FancoilSystem)
+def update_fancoil_system_flow_on_save(sender: FancoilSystem, instance: FancoilSystem, **kwargs):
+	if instance.auto_calculate_flow:
+		try:
+			heat_balance = HeatBalance.objects.get(S_ID=instance.space.S_ID)
+			instance.system_flow = heat_balance.total_heat_load()
+			instance.create_terminal_data()
+		except HeatBalance.DoesNotExist:
+			pass

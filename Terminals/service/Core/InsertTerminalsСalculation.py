@@ -16,11 +16,11 @@ class InsertTerminals:
         self.location_type = location_type
         self.device_points_number = device_points_number
 
-    def _create_curve_filter(self):
+    def _create_curve_filter(self) -> CreateCurvesFilters:
         curve_dict = CreateCurveDictionary(self.perimeter_curve)
         curve_dict.get_curves_location()
         curve_dictionary = curve_dict.get_filter_curve_dict()
-        curve_filter = CreateCurvesFilters(
+        return CreateCurvesFilters(
             curve_dictionary,
             self.device_orientation_option1,
             self.device_orientation_option2,
@@ -28,7 +28,6 @@ class InsertTerminals:
             self.device_points_number,
             two_terminals_on_short_side=True
         )
-        return curve_filter
 
     def get_long_curve_length(self):
         curve_filter = self._create_curve_filter()

@@ -6,8 +6,6 @@ from typing import Iterable
 
 from Config.models import Building
 from StaticDB.StaticData.StructureTypeData import StructureTypeData
-from Structures.HeatCalculation.StructureThermalResistenceCoefficient import \
-    get_normative_thermal_resistence_coefficient
 from Structures.Utils.TableRender import df_html
 
 from Structures.models.BaseModel import BaseModel
@@ -23,7 +21,7 @@ class BaseStructure(BaseModel):
                                help_text="принимается в расчетах если не заданы слои конструкций")
     standard_structure_type = models.CharField(max_length=200,
                                                choices=StructureTypeData.choices(),
-                                                default=StructureTypeData.Wall,
+                                               default=StructureTypeData.wall,
                                                verbose_name="тип констр.",
                                                )
     structure_picture = models.ImageField(verbose_name="Изображение", blank=True, upload_to="StructureType/%Y/%m/%d/")
@@ -37,30 +35,21 @@ class BaseStructure(BaseModel):
         ordering = ['id']
 
     @property
-    def R_norm(self):
-        qs1 = BaseStructure.objects.filter(pk=self.pk).prefetch_related(
-            'buildings_list').first().buildings_list.all()
-        data = self.render_gsop_table(qs1, self.standard_structure_type)[0]
-        df = pd.DataFrame(data)
-        if not df.empty:
-            return mark_safe(df_html(df[["Город", 'R_норматив']]))
-
-    @property
     def calculate_heat_resistance_normative(self):
         try:
             qs1 = Building.objects.all()
-            modal_body = self.render_gsop_table(qs1, self.standard_structure_type)[1]
+            modal_body = self.render_gsop_table()[1]
             return mark_safe(f"""
 			<div class="container"><details> <summary>Показать Таблицу</summary><div>{modal_body}</div></details></div>
 			""")
         except:
             return ""
-
     calculate_heat_resistance_normative.fget.short_description = 'Терм. сопрот.расчетное'
 
-    def render_gsop_table(self, building_qs: Iterable, standard_structure_type: str, layers_qs: Iterable = None):
+    def render_gsop_table(self):
+        building_qs =Building.objects.all()
         gsop_list = [val.GSOP for val in building_qs]
-        R_norm = [get_normative_thermal_resistence_coefficient(gsop).get(standard_structure_type) for gsop in gsop_list]
+        R_norm = [getattr(val,self.standard_structure_type) for val in Building.objects.all()]
         data = {"Здание": [val.name for val in building_qs],
                 "Город": [val.climate_data.name for val in building_qs],
                 "ГСОП": gsop_list,

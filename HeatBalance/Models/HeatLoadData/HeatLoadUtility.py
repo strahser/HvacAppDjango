@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from django.db.models import F
 from Config.models import Building
-from HeatBalance.Models.HeatLoadData.HeatLoad import TotalHeat
+from HeatBalance.Models.HeatLoadData.HeatLoad import HeatBalance
 from Spaces.models import SpaceData
 import pandas as pd
 from Systems.models import FancoilSystem
@@ -44,7 +44,7 @@ class HeatLoadUtility:
 		climate_data = Building.objects.filter(spacedata=spaces[0]).first().climate_data.sun_radiation
 		heat_balance_list = []
 		for space in spaces.select_related("space_category", ):
-			total_heat = TotalHeat(space, climate_data)
+			total_heat = HeatBalance(space, climate_data)
 			heat_model = HeatModel(
 				S_ID=space.S_ID,
 				total_human_load=total_heat.total_human_load(),

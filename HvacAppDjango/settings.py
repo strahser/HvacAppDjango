@@ -12,6 +12,9 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import sqlite3
 from pathlib import Path
 
+
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 from HvacAppDjango.JassminSettings import JAZZMIN_SETTINGS_DATA
 
@@ -37,6 +40,7 @@ def custom_show_toolbar(request):
 INSTALLED_APPS = [
 	'jazzmin',
 	# "debug_toolbar",
+	'import_export',
 	'adminactions',
 	'django.contrib.admin',
 	'django_extensions',
@@ -93,13 +97,18 @@ WSGI_APPLICATION = 'HvacAppDjango.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': BASE_DIR / 'db.sqlite3',
-	}
-}
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    },
+    # 'static_db': {
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'static_db.sqlite3',
+    # }
+}
+# DATABASE_ROUTERS = ['StaticDB.DbRouter.StaticDataRouter',]
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

@@ -42,7 +42,7 @@ class ChooseTerminalsInstanceFromDB:
         return flow_value if flow_value > 0 else None
 
     def get_terminal_from_points_number(self, calculated_points) -> pd.DataFrame:
-        if self.space_flow > 0:
+        if self.space_flow > 0 and calculated_points:
             terminals_data = self._get_terminal_instance_family().copy()
             terminals_data['minimum_device_number'] = calculated_points
             terminals_data['minimum_terminal_flow'] = float(self.space_flow) / float(calculated_points)
@@ -55,3 +55,5 @@ class ChooseTerminalsInstanceFromDB:
                 return self.get_minimum_device_number()
             else:
                 return terminals_data
+        else:
+            return self.get_minimum_device_number()

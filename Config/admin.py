@@ -6,7 +6,7 @@ from Config.models import Building
 
 @admin.register(Building)
 class BuildingAdmin(admin.ModelAdmin):
-	list_display = get_standard_display_list(Building) + ['GSOP']
+	additional_list = ['GSOP', ]
+	list_display = get_standard_display_list(Building, additional_list=additional_list)
 	list_display_links = ('id', 'name')
 	list_filter = ['climate_data__name']
-

@@ -1,10 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
-
 from AdminUtils import get_standard_display_list
-from Systems.Forms import DeviceGeometryForm
 from Systems.models import SystemName, FancoilSystem, SupplySystem, ExhaustSystem, HeatSystem, SystemData
-from Terminals.service.PlotePolygons.PlotTerminals import StaticPlots
 
 admin.site.index_title = "Системы"
 
@@ -17,22 +14,30 @@ class DeviceTypeAdmin(admin.ModelAdmin):
 
 class BaseSystem(admin.ModelAdmin):
 	suffix_list = ['Space_ID', 'Space_name', 'Space_number']
-	excluding_list =['space','auto_calculate_flow']
+	excluding_list = ['space', 'auto_calculate_flow', 'calculation_result']
+	additional_filter_list = ['space__S_ID', 'space__S_level', 'space__space_category']
 	list_display = suffix_list + get_standard_display_list(SupplySystem,
 	                                                       excluding_list=excluding_list,
 	                                                       additional_list=[])
-	form = DeviceGeometryForm
-	list_filter = get_standard_display_list(SupplySystem, excluding_list=excluding_list)
+	list_filter = get_standard_display_list(SupplySystem, excluding_list=excluding_list,
+	                                        additional_list=additional_filter_list)
+
 	fieldsets = (
 		('Общая информация', {
-			'fields': ('space', 'system_type', 'system_name', 'system_flow','auto_calculate_flow',)
+			'fields': ('space', 'system_type', 'system_name', 'system_flow', 'auto_calculate_flow',)
 		}),
 		('Оборудование Параметры', {
 			'fields': ('family_device_name', 'geometry_options_model',)
 		}),
 		('Расчетные Параметры', {
-			'fields': ('calculation_options', 'device_area', 'directive_terminals', 'directive_length',)
+			'fields': (
+				'calculation_options', 'device_area', 'directive_terminals', 'directive_length',)
 		}),
+		('Результаты расчета', {
+			'fields': (
+				'calculation_result',)
+		}),
+
 	)
 	change_form_template = 'jazzmin/admin/change_form.html'
 
@@ -43,7 +48,11 @@ class BaseSystem(admin.ModelAdmin):
 	def change_view(self, request, object_id, form_url='', extra_context=None):
 		extra_context = extra_context or {}
 		_filter = self.system_type.objects.filter(space_id=object_id).first()
-		extra_context['polygons'] = _filter.calculate_device()
+		if _filter:
+			extra_context['polygons'] = _filter.draw_terminals_and_polygons()
+			extra_context['terminal_data'] = mark_safe(_filter.represented_terminal_data().to_html(
+				escape=True, index=False, classes="table table-striped"))
+			return super().change_view(request, object_id, form_url, extra_context=extra_context)
 		return super().change_view(request, object_id, form_url, extra_context=extra_context)
 
 
@@ -74,5 +83,3 @@ class HeatSystemAdmin(BaseSystem):
 	@property
 	def system_type(self):
 		return HeatSystem
-
-

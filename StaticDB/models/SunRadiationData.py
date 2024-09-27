@@ -5,11 +5,6 @@ from StaticDB.StaticData.StructureTypeData import StructureTypeData
 
 class SunRadiationData(models.Model):
     name = models.CharField(verbose_name="Наименование", default="Москва",max_length=200)
-    standard_structure_type = models.CharField(max_length=200,
-                                               choices=StructureTypeData.choices(),
-                                                default=StructureTypeData.Window,
-                                               verbose_name="тип констр.",
-                                               )
     N = models.FloatField(verbose_name="С", default=100)
     S = models.FloatField(verbose_name="Ю", default=360)
     E = models.FloatField(verbose_name="В", default=350)

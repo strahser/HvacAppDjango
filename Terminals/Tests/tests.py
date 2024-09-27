@@ -57,25 +57,28 @@ def plot_db_data():
 
 
 def add_json_data_to_data_base(json_path):
-	cursor = CONNECTION.cursor()
-	cursor.execute("select S_ID from Spaces_spacedata")
-	id_list = [val[0] for val in cursor.fetchall()]
+	def load_json_to_db():
+		cursor = CONNECTION.cursor()
+		cursor.execute("select S_ID from Spaces_spacedata")
+		id_list = [val[0] for val in cursor.fetchall()]
+		for data in json_data:
+			for k, v in data.items():
+				if k in id_list:
+					sql_update_query = "Update Spaces_spacedata set geometry_data = json_insert (?) where S_ID = ?"
+					data = (json.dumps(v), str(k))
+					cursor.execute(sql_update_query, data)
+					CONNECTION.commit()
+					print(f"Запись{k} успешно обновлена")
+		cursor.close()
+
 	with open(json_path) as f:
 		json_data = json.load(f)
-	for k, v in json_data.items():
-		if k in id_list:
-			sql_update_query = "Update Spaces_spacedata set geometry_data = json_insert (?) where S_ID = ?"
-			data = (json.dumps(v), str(k))
-			cursor.execute(sql_update_query, data)
-			CONNECTION.commit()
-			print(f"Запись{k} успешно обновлена")
-	cursor.close()
-
-
+	load_json_to_db()
 # add_equipment_data()
 # add_space_data()
 # _input_data_df = InputDataDF()  # [928208,928209]
 # _input_data_df.json_df.to_html("json_df.html")
 # _input_data_df.space_systems_df.to_html("space_systems_df.html")
-json_path = r'C:\Users\Strakhov\YandexDisk\ProjectCoding\HvacAppDjango\polygon_data_file.json'
+json_path = r'd:\Yandex\YandexDisk\ProjectCoding\InputDataStreamlit\Simple building\space_data.json'
 add_json_data_to_data_base(json_path)
+

@@ -1,7 +1,9 @@
 from django.contrib import admin
 
+from HvacAppDjango.models.BaseModel import BaseModel
 
-class SpaceDataRepresentation:
+
+class SpaceDataRepresentation(BaseModel):
 	short_names = ['id', 'Space_ID', 'Space_name', 'Space_number']
 	space = None
 

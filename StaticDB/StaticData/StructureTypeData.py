@@ -10,12 +10,12 @@ class StructureData:
 
 
 class StructureTypeData(Enum):
-	Wall: str = "Стена"
-	Door: str = "Дверь"
-	Window: str = "Окно"
-	Skylight: str = "Зенитный фонарь"# -Зенитных фонарей
-	Floor: str = "Перекрытие"# Покрытий и перекрытий над проездами
-	Roof: str = "Кровля"# Перекрытий чердачных, над неотапливаемыми подпольями и подвалами
+	wall: str = "Стена"
+	door: str = "Дверь"
+	window: str = "Окно"
+	skylight: str = "Зенитный фонарь"# -Зенитных фонарей
+	floor: str = "Перекрытие"# Покрытий и перекрытий над проездами
+	roof: str = "Кровля"# Перекрытий чердачных, над неотапливаемыми подпольями и подвалами
 
 	@classmethod
 	def choices(cls) -> List[Tuple[str, Any]]:

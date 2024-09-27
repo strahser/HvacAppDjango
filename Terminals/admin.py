@@ -12,3 +12,4 @@ class DeviceTypeAdmin(admin.ModelAdmin):
 class EquipmentBaseAdmin(admin.ModelAdmin):
 	list_display = get_standard_display_list(EquipmentBase)
 	list_display_links = ('family_device_name',)
+	list_filter = ["system_equipment_type","family_device_name","system_flow_parameter_name",]
