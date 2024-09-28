@@ -9,15 +9,16 @@ from StaticDB.StaticData.SystemChoices import SYSTEM_DICTIONARY
 
 class StaticPlots:
     @staticmethod
-    def plot_scatters(ax, points_coordinates, dimension: float = 100, color: str = "c", geometry: str = "o"):
+    def plot_scatters(ax, points_coordinates, text_, dimension: float = 100, color: str = "s", geometry: str = "o"):
         dimension = dimension if isinstance(dimension, (int, float)) else int(dimension)
         point_style = dict(s=dimension / 2, c=color, marker=geometry)
-        if points_coordinates:
-            if isinstance(points_coordinates[0], float) or isinstance(points_coordinates[0], int):
-                ax.scatter(points_coordinates[0], points_coordinates[1], **point_style)
-            else:
-                ax.scatter([x[0] for x in points_coordinates], [x[1] for x in points_coordinates],
-                           **point_style)
+        if isinstance(points_coordinates[0], float) or isinstance(points_coordinates[0], int):
+            ax.scatter(points_coordinates[0], points_coordinates[1], **point_style)
+            ax.text(points_coordinates[0] + 500, points_coordinates[1] + 600, text_)
+        else:
+            ax.scatter([x[0] for x in points_coordinates], [x[1] for x in points_coordinates],
+                       **point_style)
+            [ax.text(p_[0] + 500, p_[1], text_) for p_ in points_coordinates]
 
     @staticmethod
     def add_text_to_df_terminals_points_column(ax, points_, text_):

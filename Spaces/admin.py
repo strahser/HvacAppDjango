@@ -11,7 +11,6 @@ from StaticDB.StaticData.SystemChoices import SystemType
 from django.contrib import messages
 from typing import List
 from admin_form_action import form_action
-from Systems.Forms import SystemForm
 from Systems.models import SupplySystem, ExhaustSystem, FancoilSystem, HeatSystem, SystemData
 import adminactions.actions as actions
 from django.contrib.admin import site
@@ -22,6 +21,7 @@ from import_export.fields import Field
 from import_export import fields, widgets
 from django.utils.translation import gettext_lazy as _
 from Terminals.service.PlotePolygons.PlotTerminals import StaticPlots
+from Systems.Forms import SystemForm
 
 actions.add_to_site(site)
 

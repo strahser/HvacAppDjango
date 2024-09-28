@@ -7,7 +7,7 @@ from matplotlib import pyplot as plt
 from Config.models import Building
 from django.contrib import admin
 
-from HvacAppDjango.models.BaseModel import BaseModel
+from HvacAppDjango.models import BaseModel
 from Systems.models import ExhaustSystem, SupplySystem, FancoilSystem
 from shapely import Polygon
 
