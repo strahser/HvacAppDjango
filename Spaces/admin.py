@@ -1,5 +1,4 @@
 import json
-
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.utils.safestring import mark_safe
@@ -49,13 +48,11 @@ class HeatSystemInline(SystemInlineBase):
 
 class StructureInline(admin.StackedInline):
 	model = Structure
-	# form = StructureForm
 	extra = 0
 
 
 class HeatLoadInline(admin.StackedInline):
 	model = HeatBalance
-	# fields = ['total_equipment_load', 'lighting_load', 'total_heat_load']
 	extra = 0
 
 
@@ -112,9 +109,9 @@ class SpaceDataAdmin(admin.ModelAdmin):
 			return response
 
 		# Получаем данные из формы
-		width = request.POST.get('width', 15)  # Ширина по умолчанию 20 дюймов
-		height = request.POST.get('height', 15)  # Высота по умолчанию 20 дюймов
-		level_list = qs.values_list("S_level", flat=True).distinct().order_by()
+		width = request.POST.get('width', 15)  # Ширина по умолчанию 15дюймов
+		height = request.POST.get('height', 15)  # Высота по умолчанию 15 дюймов
+		level_list = qs.values_list("S_level", flat=True).distinct().order_by()  # для выбора уровней в  плоттере
 		level_figures = []
 		for level in level_list:
 			try:
@@ -133,45 +130,8 @@ class SpaceDataAdmin(admin.ModelAdmin):
 		return response
 
 
-class JSONField(fields.Field):
-	"""
-    Кастомное поле для импорта JSON-данных.
-    """
-	widget = widgets.JSONWidget
-
-	def __init__(self, *args, **kwargs):
-		super().__init__(*args, **kwargs)
-		self.attribute_name = self.attribute
-		self.column_name = self.column_name or self.attribute
-
-	def clean(self, data):
-		"""Десериализация JSON-строки в Python-словарь."""
-		if data:
-			try:
-				return json.loads(data)
-			except json.JSONDecodeError:
-				raise ValidationError(_("Некорректный формат JSON."))
-		return None
-
-
-class SpaceResource(resources.ModelResource):
-	class Meta:
-		model = SpaceData
-		exclude = ('id',)
-		S_ID = Field(attribute='S_ID', column_name='S_ID')
-		S_Number = Field(attribute='S_Number', column_name='S_Number')
-		S_Name = Field(attribute='S_Name', column_name='S_Name')
-		S_height = Field(attribute='S_height', column_name='S_height')
-		S_area = Field(attribute='S_area', column_name='S_area')
-		S_Volume = Field(attribute='S_Volume', column_name='S_Volume')
-		S_level = Field(attribute='S_level', column_name='S_level')
-		geometry_data = JSONField(attribute='geometry_data')
-		fields = ("S_ID", "S_Number", "S_Name", "S_height", "S_area", "S_Volume", "S_level", "geometry_data")
-		import_id_fields = ('S_ID',)
-
-
 @admin.register(SpaceData)
-class SpaceDataAdmin(ImportExportModelAdmin):
+class SpaceDataAdmin(admin.ModelAdmin):
 	additional_list = ["SupplySystemDisplay", "ExhaustSystemDisplay", "FancoilSystemDisplay", ]
 	excluding_list = ['geometry_data', "building"]
 	additional_list_filter = [SupplySystemDisplayFilter, ExhaustSystemDisplayFilter, FancoilDisplayFilter]
@@ -181,7 +141,6 @@ class SpaceDataAdmin(ImportExportModelAdmin):
 	inlines = [StructureInline, SupplySystemInline, ExhaustSystemInline, FancoilSystemInline, HeatSystemInline]
 	actions = ['add_system']
 	change_form_template = 'jazzmin/admin/change_form.html'
-	resource_class = SpaceResource
 
 	def change_view(self, request, object_id, form_url='', extra_context=None):
 		extra_context = extra_context or {}

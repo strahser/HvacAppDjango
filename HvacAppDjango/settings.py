@@ -29,9 +29,8 @@ SECRET_KEY = 'django-insecure-ml22s^77n%7+9@kh^!kg%13=%we)@0-=_73vz)yiscf05w3!+v
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.2']
-INTERNAL_IPS = ['127.0.0.2']
-
+ALLOWED_HOSTS = ['*']
+PORT = 8080
 
 def custom_show_toolbar(request):
 	return True  # Always show toolbar, for example purposes only.

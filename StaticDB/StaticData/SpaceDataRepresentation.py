@@ -13,6 +13,6 @@ class SpaceDataRepresentation:
     def Space_name(self):
         return self.space.S_Name
 
-	@admin.display(description='Ном. пом.', ordering="space__S_Number")
-	def Space_number(self):
-		return self.space.S_Number
+    @admin.display(description='Ном. пом.', ordering="space__S_Number")
+    def Space_number(self):
+        return self.space.S_Number

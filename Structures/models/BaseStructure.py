@@ -7,11 +7,10 @@ from typing import Iterable
 from Config.models import Building
 from StaticDB.StaticData.StructureTypeData import StructureTypeData
 from Structures.Utils.TableRender import df_html
+from Structures.models.BaseModel import BaseModelStructure
 
-from Structures.models.BaseModel import BaseModel
 
-
-class BaseStructure(BaseModel):
+class BaseStructure(BaseModelStructure):
     """шаблон типовых конструкций, без конкретной площади. Например навесной фасад.
     Состоит из множества слоев. Опционально можем расчитать ГСОП конструкции и получить нормируемый коэффицент теплопередачи,
     если выберим здания/здание (множественный выбор)

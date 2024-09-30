@@ -1,29 +1,23 @@
 from django.db import models
+
+from HvacAppDjango.models import BaseModel
 from StaticDB.StaticData.SystemChoices import Orientation, CenterOrientation
 from StaticDB.StaticData.SystemChoices import SystemType
-
-
-class BaseModel(models.Model):
-    creation_stamp = models.DateTimeField(auto_now_add=True, verbose_name="дата создания", null=True)
-    update_stamp = models.DateTimeField(auto_now=True, verbose_name="дата изменения", null=True)
-
-    class Meta:
-        abstract = True
 
 
 class EquipmentBase(BaseModel):
     system_equipment_type = models.CharField(max_length=200, choices=SystemType.choices(),
                                              default=SystemType.choices()[0])
-    equipment_id = models.CharField(max_length=200,unique=True)
+    equipment_id = models.CharField(max_length=200, unique=True)
     family_device_name = models.CharField(max_length=200)
     family_instance_name = models.CharField(max_length=200)
     max_flow = models.FloatField()
     normal_velocity = models.FloatField(default=2, null=True, blank=True)
-    geometry = models.CharField(max_length=200,null=True, blank=True,default='c')
-    dimension1 = models.CharField(max_length=200,null=True, blank=True)
-    manufacture = models.CharField(max_length=200,null=True, blank=True)
-    system_flow_parameter_name = models.CharField(max_length=200,null=True, blank=True)
-    system_name_parameter = models.CharField(max_length=200,null=True, blank=True)
+    geometry = models.CharField(max_length=200, null=True, blank=True, default='c')
+    dimension1 = models.CharField(max_length=200, null=True, blank=True)
+    manufacture = models.CharField(max_length=200, null=True, blank=True)
+    system_flow_parameter_name = models.CharField(max_length=200, null=True, blank=True)
+    system_name_parameter = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
         return f"{self.family_device_name}"

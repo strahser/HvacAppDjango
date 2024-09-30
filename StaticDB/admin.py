@@ -16,7 +16,7 @@ class ClimateDataAdmin(admin.ModelAdmin):
 
 
 @admin.register(SunRadiationData)
-class ConstructionDataAdmin(admin.ModelAdmin):
+class SunRadiationDataAdmin(admin.ModelAdmin):
 	list_display = get_standard_display_list(SunRadiationData)
 	list_display_links = ['name']
 	list_per_page = 10
@@ -38,7 +38,7 @@ class SpaceCategoryAdmin(admin.ModelAdmin):
 
 
 @admin.register(BuildingProperty)
-class StructureTypeAdmin(admin.ModelAdmin):
+class BuildingPropertyAdmin(admin.ModelAdmin):
 	list_display = get_standard_display_list(BuildingProperty)
 	list_per_page = 10
 	actions = [duplicate_event]

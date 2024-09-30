@@ -5,6 +5,7 @@ from matplotlib import pyplot as plt
 from Terminals.service.PlotePolygons.SetColor import SetColor
 from Terminals.service.Static.ColumnChoosing import ColumnChoosing
 from StaticDB.StaticData.SystemChoices import SYSTEM_DICTIONARY
+from loguru import logger
 
 
 class StaticPlots:
@@ -12,13 +13,14 @@ class StaticPlots:
     def plot_scatters(ax, points_coordinates, text_, dimension: float = 100, color: str = "s", geometry: str = "o"):
         dimension = dimension if isinstance(dimension, (int, float)) else int(dimension)
         point_style = dict(s=dimension / 2, c=color, marker=geometry)
+
         if isinstance(points_coordinates[0], float) or isinstance(points_coordinates[0], int):
             ax.scatter(points_coordinates[0], points_coordinates[1], **point_style)
-            ax.text(points_coordinates[0] + 500, points_coordinates[1] + 600, text_)
+            ax.text(points_coordinates[0], points_coordinates[1], text_)
         else:
             ax.scatter([x[0] for x in points_coordinates], [x[1] for x in points_coordinates],
                        **point_style)
-            [ax.text(p_[0] + 500, p_[1], text_) for p_ in points_coordinates]
+            [ax.text(p_[0], p_[1], text_) for p_ in points_coordinates]
 
     @staticmethod
     def add_text_to_df_terminals_points_column(ax, points_, text_):

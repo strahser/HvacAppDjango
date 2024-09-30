@@ -53,7 +53,7 @@ def update_system_flow(sender, instance, **kwargs):
             else:
                 return  # Неизвестный тип объекта
 
-            instance.create_terminal_data()
+            instance.calculate_terminal_data()
         except AirBalance.DoesNotExist:
             pass
 

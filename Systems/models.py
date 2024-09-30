@@ -1,6 +1,4 @@
 import math
-from pprint import pprint
-
 import numpy as np
 from Systems.CreateTerminals.TerminalData import TerminalData, REPORT_LIST, DATA_LIST
 from Terminals.models import DeviceGeometry, EquipmentBase
@@ -37,6 +35,19 @@ class SystemName(BaseModel):
         verbose_name_plural = 'Система Наименование'
 
 
+@receiver(pre_save, sender=SystemName)
+def set_unique_color(sender, instance, **kwargs):
+    """
+    При создании SystemName устанавливает уникальный цвет из COLOR_CHOICES.
+    """
+    if not instance.pk:  # Проверяем, что объект создается, а не обновляется
+        all_colors = set([color[0] for color in COLOR_CHOICES])
+        taken_colors = set(SystemName.objects.values_list('system_color', flat=True))
+        available_colors = list(all_colors - taken_colors)
+        if available_colors:
+            instance.system_color = available_colors[0]
+
+
 class SystemData(BaseModel, SpaceDataRepresentation):
     system_type_choices = SystemType.choices()
     system_type = models.CharField(max_length=200,
@@ -59,9 +70,9 @@ class SystemData(BaseModel, SpaceDataRepresentation):
     calculation_result = models.JSONField(null=True, blank=True, verbose_name='Результаты расчета')
 
     def save(self, *args, **kwargs):
-        # Преобразуйте данные в словарь
-        if isinstance(self.create_terminal_data(), TerminalData):
-            self.calculation_result = self.create_terminal_data().__dict__
+        # сохраняем JSON
+        if isinstance(self.calculate_terminal_data(), TerminalData):
+            self.calculation_result = self.calculate_terminal_data().__dict__
         super().save(*args, **kwargs)
 
     @property
@@ -123,7 +134,7 @@ class SystemData(BaseModel, SpaceDataRepresentation):
             self.geometry_options_model.single_device_orientation,
             device_points_number)
 
-    def create_terminal_data(self) -> TerminalData:
+    def calculate_terminal_data(self) -> TerminalData:
         data_dict = {}
 
         def repeat_tuple(tuple_to_repeat: tuple[float, float], times: int) -> list[tuple[float, float]]:
@@ -170,9 +181,9 @@ class SystemData(BaseModel, SpaceDataRepresentation):
                 return terminal_data
 
     def represented_terminal_data(self) -> pd.DataFrame:
-        if self.create_terminal_data():
+        if self.calculate_terminal_data():
             try:
-                df = pd.DataFrame([self.create_terminal_data()])[REPORT_LIST.keys()].rename(REPORT_LIST, axis=1)
+                df = pd.DataFrame([self.calculate_terminal_data()])[REPORT_LIST.keys()].rename(REPORT_LIST, axis=1)
                 return df
             except Exception as e:
                 logger.error(f"Ошибка при созаднии DataFrame {self.space.S_ID}: {e}")
@@ -181,16 +192,17 @@ class SystemData(BaseModel, SpaceDataRepresentation):
     def _draw_terminals(self, fig=None, ax=None):
         if not fig and not ax:
             fig, ax = plt.subplots()
-        points_coordinates = self.calculation_result.get('points_2d_plot')
-        if points_coordinates:
-            StaticPlots.plot_scatters(ax, points_coordinates,
-                                      self.system_name,
-                                      dimension=self.calculation_result.get('dimension1'),
-                                      geometry=self.calculation_result.get('geometry'),
-                                      color=self.system_name.system_color
-                                      )
-            plt.axis('off')
-            return fig
+        if self.calculation_result:
+            points_coordinates = self.calculation_result.get('points_2d_plot')
+            if points_coordinates:
+                StaticPlots.plot_scatters(ax, points_coordinates,
+                                          self.system_name,
+                                          dimension=self.calculation_result.get('dimension1'),
+                                          geometry=self.calculation_result.get('geometry'),
+                                          color=self.system_name.system_color
+                                          )
+                plt.axis('off')
+                return fig
         else:
             return fig
 
@@ -256,16 +268,3 @@ class HeatSystem(SystemData):
     class Meta:
         verbose_name = f"Система {SystemType.Heat_system.value}"
         verbose_name_plural = f"Система {SystemType.Heat_system.value}"
-
-
-@receiver(pre_save, sender=SystemName)
-def set_unique_color(sender, instance, **kwargs):
-    """
-    При создании SystemName устанавливает уникальный цвет из COLOR_CHOICES.
-    """
-    if not instance.pk:  # Проверяем, что объект создается, а не обновляется
-        all_colors = set([color[0] for color in COLOR_CHOICES])
-        taken_colors = set(SystemName.objects.values_list('system_color', flat=True))
-        available_colors = list(all_colors - taken_colors)
-        if available_colors:
-            instance.system_color = available_colors[0]

@@ -1,18 +1,11 @@
 from django.db import models
-from django.db.models import Sum
-
 from Spaces.models import SpaceData
 from django.contrib import admin
-
 from StaticDB.StaticData.SpaceDataRepresentation import SpaceDataRepresentation
-from StaticDB.StaticData.StructureTypeData import StructureTypeData
-from Structures.models.Structure import Structure, StructureRadiation
-import logging
+from Structures.models.Structure import StructureRadiation
 from Systems.models import FancoilSystem
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-
-logging.basicConfig()
 
 
 class HeatBalance(SpaceData):
@@ -63,7 +56,7 @@ class HeatBalance(SpaceData):
 
 
 class HeatAdditionalLoad(models.Model, SpaceDataRepresentation):
-	space = models.ForeignKey(SpaceData, on_delete=models.CASCADE, verbose_name='Помещение')
+	space = models.ForeignKey("Spaces.SpaceData", on_delete=models.CASCADE, verbose_name='Помещение')
 	heat_load = models.FloatField(verbose_name='дополнительные теплопотери', null=True, blank=True)
 
 	class Meta:
@@ -72,7 +65,7 @@ class HeatAdditionalLoad(models.Model, SpaceDataRepresentation):
 
 
 class HeatLoadEquipment(models.Model, SpaceDataRepresentation):
-	space = models.ForeignKey(SpaceData, on_delete=models.CASCADE, verbose_name='Помещение')
+	space = models.ForeignKey("Spaces.SpaceData", on_delete=models.CASCADE, verbose_name='Помещение')
 	heat_equipment = models.ForeignKey('HeatEquipment', on_delete=models.CASCADE, verbose_name='Наим.обор.')
 	quantity = models.IntegerField(default=1, verbose_name='Кол-во')
 
@@ -111,6 +104,6 @@ def update_fancoil_system_flow_on_save(sender: FancoilSystem, instance: FancoilS
 		try:
 			heat_balance = HeatBalance.objects.get(S_ID=instance.space.S_ID)
 			instance.system_flow = heat_balance.total_heat_load()
-			instance.create_terminal_data()
+			instance.calculate_terminal_data()
 		except HeatBalance.DoesNotExist:
 			pass

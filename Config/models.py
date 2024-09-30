@@ -54,7 +54,7 @@ class Building(models.Model):
                 .first()
                 )
 
-    def calculate_normative_coefficient(self):
+    def calculate_normative_coefficient(self)->NormativeData:
         a = self._get_coefficient('a')
         b = self._get_coefficient('b')
         wall = a.wall * self.GSOP + b.wall
@@ -74,7 +74,7 @@ class Building(models.Model):
                                        roof=round(roof, 2), skylight=round(skylight, 2))
         return normative_data
 
-    def save(self, *args, **kwargs):
+    def save(self, *args, **kwargs)->None:
         try:
             normative_data = self.calculate_normative_coefficient()
             self.wall = normative_data.wall
